@@ -1,0 +1,386 @@
+#--------------------------------------------------------------------------
+# C1_IFO_maxtem4_current.kat
+#
+# No IMC for now...
+#--------------------------------------------------------------------------
+
+%%% FTblock laser
+###########################################################################
+l L0 1 0 n0
+s lmod1 1 n0 n1
+mod mod1 $f1 0.3 5 pm n1 n2
+s lmod2 1 n2 n3
+mod mod2 $f2 0.3 5 pm n3 n4
+s lmod2toPRM 1 n4 nREFL
+###########################################################################
+%%% FTend laser
+
+%%% FTblock PRC
+#####################################################################################
+# PRM --- S/N PRMU02  --- taken from 40m wiki Core Optics section
+# AR surface
+m2 PRMAR 160u 25u $phi_PRM nREFL nPRMARb
+
+# Substrate
+s sPRMsub1 25m $nsilica nPRMARb nPRMHRa
+
+# HR surface
+m1 PRMHR 0.05637 25u $phi_PRM nPRMHRa nPRMHRb
+attr PRMHR Rc 115.6  
+
+# Distance between PRM and PR2 AR surface --- taken from elog9590
+s lp1 1.8757 nPRMHRb nPR2AR
+
+# PR2-04 optic
+bs1 PR2AR 0.999 25u 0 1.48 nPR2AR dump nPR2sub1 dump
+attr PR2AR Rc 0
+
+# Substrate
+s sPR2sub1 10.0404m $nsilica nPR2sub1 nPR2HR
+
+# PR2-04 optic
+bs1 PR2HR 1000u 25u 0 1.48 nPR2HR nPR2sub2 dump nPOP
+attr PR2HR Rc 600
+
+# Substrate
+s sPR2sub2 10.0404m $nsilica nPR2sub2 nPR2AR2
+
+# PR2-04 optic
+bs1 PR2AR2 0.999 25u 0 1.48 nPR2AR2 dump nPR2sub3 dump
+attr PR2AR2 Rc 0
+
+# Distance from PR2 to PR3
+s lp2 2.0808 nPR2sub3 nPR3AR
+
+# PR3 optic
+bs1 PR3AR 0.995 25u 0 41.11 nPR3AR dump nPR3sub1 dump
+attr PR3AR Rc 0
+
+# Substrate
+s sPR3sub1 10.4604m $nsilica nPR3sub1 nPR3HR
+
+# PR3 optic
+bs1 PR3HR 1000u 25u 0 41.11 nPR3HR nPR3sub2 dump dump
+attr PR3HR Rc 700
+
+# Substrate
+s sPR3sub2 10.4604m $nsilica nPR3sub2 nPR3AR2
+
+# PR3 optic
+bs1 PR3AR2 0.995 25u 0 41.11 nPR3AR2 dump nPR3sub3 dump
+attr PR3AR2 Rc 0
+
+# Distance from PR3 to BS
+s lp3 0.401161 nPR3sub3 nPRBS
+#Sum of distances from PRMHR to BSHR = 4.4087m (4.4271 free-space distance)
+
+###########################################################################
+%%% FTend PR
+
+%%% FTblock BS
+###########################################################################
+# BS beamsplitter BS-06
+##------------------------------------------------------------ 
+## BS 
+##                             ^ 
+##                  to ITMY    |      
+##                             |      ,'-.
+##                             |     +    `. 
+##                     nHRBS_Y |   ,'       :'
+##      nPR3b                  |  +i1      +
+##         ---------------->    ,:._  i2 ,'
+##    from the PRC    nHRBS_PR + \  `-. + nARBSX_X
+##                           ,' i3\   ,' --------------->
+##                          +      \ +     to ITMX
+##                        ,'     i4.'
+##                       `._      ..
+##                          `._ ,' |nARBSSR_SR
+##                             -   |
+## i1=nHRBS_X                      |to the SRC
+## i2=nARBSX_sub                   |
+## i3=nHRBS_SR                     v
+## i4=nARBSSR_sub
+##------------------------------------------------------------
+
+# BS BS-06
+bs1 BS 0.5 50u $phi_BS 45 nPRBS nXBS nBSi1 nBSi3
+s BSsub1 28.6399m $nsilica nBSi1 nBSi2
+s BSsub2 28.6399m $nsilica nBSi3 nBSi4
+bs2 BSAR1 600u 1.4u $phi_BS -29.1951 nBSi2 dump nYBS nPOY
+bs2 BSAR2 600u 1.4u $phi_BS 29.1951 nBSi4 dump nSRBS dump
+
+###########################################################################
+%%% FTend BS
+
+%%% FTblock Yarm
+###########################################################################
+#Distance from BS to ITMY
+s lBStoITMY 2.2403 nYBS nITMYconstLa
+# =>PRY length = 6.6866m (6.7219 free space dist to ITMY HR)
+
+# Constant ITMY substrate lens
+lens ITMYconstL inf nITMYconstLa nITMYconstLb
+s ITMYTL_null2 0 nITMYconstLb nITMY1
+
+m2 ITMYAR 417u 25u $phi_ITMY nITMY1 nITMYs1
+s lITMY 25m $nsilica nITMYs1 nITMYs2
+
+#m1 ITMYHR 0.01384 115u $phi_ITMY nITMYs2 nITMY2
+m1 ITMYHR 0.01384 0 $phi_ITMY nITMYs2 nITMY2
+attr ITMYHR Rcx -883400.0
+attr ITMYHR Rcy -883400.0
+
+# Y-arm
+s sYARM $l_yarm nITMY2 nETMY1
+
+# ETMY - ETM-12
+#m1 ETMYHR 13.7u  115u $phi_ETMY nETMY1 nETMYs1 #Loss taken from elog 11864
+m1 ETMYHR 13.7u  0 $phi_ETMY nETMY1 nETMYs1 #Loss taken from elog 11864
+s ETMYsub 25m $nsilica nETMYs1 nETMYs2
+m2 ETMYAR 93.3u 0 $phi_ETMY nETMYs2 nPTY
+attr ETMYHR Rcx 60.2
+attr ETMYHR Rcy 60.2
+
+attr ITMYHR mass 0.2462
+attr ETMYHR mass 0.2462
+
+###########################################################################
+%%% FTend Yarm
+
+%%% FTblock Xarm
+###########################################################################
+#Distance from BS to ITMX
+s lBStoITMX 2.3182 nXBS nITMXconstLa
+# =>PRX length = 6.7519 (6.7815 free space)
+# Non-thermal ITM lens
+lens ITMXconstL inf nITMXconstLa nITMXconstLb
+s ITMXTL_null2 0 nITMXconstLb nITMX1
+
+#ITMX
+m2 ITMXAR 417u 25u $phi_ITMX nITMX1 nITMXs1
+s ITMXsub 25m $nsilica nITMXs1 nITMXs2
+
+#m1 ITMXHR 0.01384 242u $phi_ITMX nITMXs2 nITMX2
+m1 ITMXHR 0.01384 0 $phi_ITMX nITMXs2 nITMX2
+s sXARM $l_xarm nITMX2 nETMX1
+
+# X arm ETM - ETM-08
+#m1 ETMXHR 13.7u 242u $phi_ETMX nETMX1 nETMXs1  #Loss taken from elog 11864
+m1 ETMXHR 13.7u 0 $phi_ETMX nETMX1 nETMXs1  #Loss taken from elog 11864
+s ETMXsub 25m $nsilica nETMXs1 nETMXs2
+m2 ETMXAR 93.3u 0 0 nETMXs2 nPTX
+
+attr ITMXHR Rcx 83100
+attr ITMXHR Rcy 83100
+attr ETMXHR Rcx 59.5
+attr ETMXHR Rcy 59.5
+
+attr ITMXHR mass 0.2642
+attr ETMXHR mass 0.2642
+
+###########################################################################
+%%% FTend Xarm
+
+%%% FTblock SR
+###########################################################################
+
+# Distance from BS to SR3
+s ls3 0.21388 nSRBS nSR3AR
+
+# SR3 SR3-02
+bs1 SR3AR 0.995 25u 0 43.90 nSR3AR dump nSR3sub1 dump
+attr SR3AR Rc 0
+# Substrate
+s sSR3sub1 10.4724m $nsilica nSR3sub1 nSR3HR
+# SR3 HR
+bs1 SR3HR 1000u 25u 0 43.90 nSR3HR nSR3sub2 dump dump
+attr SR3HR Rc 700
+# Substrate
+s sSR3sub2 10.4724m $nsilica nSR3sub2 nSR3AR2
+
+# SR3 SR3-02
+bs1 SR3AR2 0.995 25u 0 43.90 nSR3AR2 dump nSR3sub3 dump
+attr SR3AR2 Rc 0
+
+# Distance from SR3 to SR2
+s ls2 2.2794 nSR3sub3 nSR2AR
+
+
+# SR2-AR side
+bs1 SR2AR 0.999 25u 0 5.64 nSR2AR dump nSR2sub1 dump
+attr SR2AR Rc 0
+# SR2 Substrate
+s sSR2sub1 9.020m $nsilica nSR2sub1 nSR2HR
+# SR2 HR
+bs1 SR2HR 1000u 25u 0 5.64 nSR2HR nSR2sub2 dump dump
+attr SR2HR Rc 600
+# SR2 Substrate
+s sSR2sub2 9.020m $nsilica nSR2sub2 nSR2AR2
+
+# SR2-AR side
+bs1 SR2AR2 0.999 25u 0 5.64 nSR2AR2 dump nSR2sub3 dump
+attr SR2AR2 Rc 0
+
+# Distance from SR2 to SRMHR
+s ls1 0.545027 nSR2sub3 nSRMHRa
+#s ls1 0.4519 nSR2sub3 nSRMHRa #just tuning this to reach "ideal" SRC length
+
+# Signal recycling mirror SRMw-14
+m1 SRMHR 0.09903 25u $phi_SRM nSRMHRa nSRMHRb
+s SRMsub 25m $nsilica nSRMHRb nSRMARa
+m2 SRMAR 67.6u 25u $phi_SRM nSRMARa nSRMARb
+attr SRMHR Rc 148.1
+
+###########################################################################
+%%% FTend SR
+
+
+%%% FTblock tunings 
+###########################################################################
+const phi_SRM 90.0142262023848
+const phi_PRM -0.00137763308070598
+const phi_ITMX -0.00057764054342924
+const phi_ITMY 0.00057764054342924
+const phi_ETMX 0.00045080185267222
+const phi_ETMY -0.000669220830012709
+const phi_BS 0
+###########################################################################
+%%% FTend tunings
+
+%%% FTblock constants
+###########################################################################
+
+const nsilica 1.44963098985906
+const f1 11066209
+const f2 55331045
+const l_xarm 37.79
+const l_yarm 37.79
+
+###########################################################################
+%%% FTend constants
+
+%%% FTblock errsigs
+###########################################################################
+/*
+pd1 REFL_f1_I $f1 95 nREFL
+pd1 REFL_f1_Q $f1 185 nREFL
+pd1 REFL_f2_I $f2 0 nREFL
+pd1 REFL_f2_Q $f2 90 nREFL
+pd1 POP_f1_I $f1 90 nPOP
+pd1 POP_f1_Q $f1 0 nPOP
+pd1 POP_f2_I $f2 10 nPOP
+pd1 POP_f2_Q $f2 100 nPOP
+pd1 AS_f1_I $f1 0 nSRMARb
+pd1 AS_f1_Q $f1 90 nSRMARb
+pd1 AS_f2_I $f2 165 nSRMARb
+pd1 AS_f2_Q $f2 255 nSRMARb
+#pd1 OMClockpd $fdither -1.22 nAS
+*/
+###########################################################################
+%%% FTend errsigs
+
+%%% FTblock powers
+###########################################################################
+/*
+pd P_DC_AS  nSRMARb
+pd Px nITMX2
+pd Py nITMY2
+pd Pprc nPRMHRb
+pd Psrc nSRMHRa*
+
+ad prc0 0 nPRMHRb
+ad prcf1 $f1 nPRMHRb
+ad prcf2 $f2 nPRMHRb
+#ad aoc0 0 nOMC_HROC_trans
+ad asc0 0 nSRMARb
+ad asf1 $f1 nSRMARb
+ad asf2 $f2 nSRMARb
+ad src0 0 nSRMHRa*
+ad srcf1 $f1 nSRMHRa*
+ad srcf2 $f2 nSRMHRa*
+*/
+###########################################################################
+%%% FTend powers
+
+%%% FTblock HOMs
+###########################################################################
+
+cav cavPRX PRMHR nPRMHRb ITMXHR nITMXs2
+cav cavPRY PRMHR nPRMHRb ITMYHR nITMYs2
+cav cavSRX SRMHR nSRMHRa ITMXHR nITMXs2
+cav cavSRY SRMHR nSRMHRa ITMYHR nITMYs2
+cav cavXARM ITMXHR nITMX2 ETMXHR nETMX1
+cav cavYARM ITMYHR nITMY2 ETMYHR nETMY1
+maxtem 4
+
+###########################################################################
+%%% FTend HOMs
+/*
+%%% FTblock locks
+###########################################################################
+
+set PRCL_err POP_f1_I  re
+set MICH_err POP_f2_Q  re
+set CARM_err REFL_f1_I re
+set SRCL_err REFL_f2_I re
+set AS_f2_I_re AS_f2_I re
+
+func DARM_err = $AS_f2_I_re - 0.728491141201167
+
+lock PRCL_lock $PRCL_err -5.63182948796 10u
+lock MICH_lock $MICH_err 9.21575251194 10u
+lock CARM_lock $CARM_err 6.00608364567e-05 10u
+lock DARM_lock $DARM_err -0.00390832224772 1u
+lock SRCL_lock $SRCL_err -1.11652869206 10u
+
+func mMICH_lock = 0 - $MICH_lock
+func ETMX_lock = $CARM_lock + $MICH_lock + $DARM_lock
+func ETMY_lock = $CARM_lock - $MICH_lock - $DARM_lock
+
+put* PRMHR   phi     $PRCL_lock
+put* PRMAR   phi     $PRCL_lock
+
+put* ITMXHR  phi     $MICH_lock
+put* ITMXAR  phi     $MICH_lock
+put* ITMYHR  phi     $mMICH_lock
+put* ITMYAR  phi     $mMICH_lock
+
+put* ETMXHR  phi     $ETMX_lock
+put* ETMXAR  phi     $ETMX_lock
+
+put* ETMYHR  phi     $ETMY_lock
+put* ETMYAR  phi     $ETMY_lock
+
+put* SRMHR   phi     $SRCL_lock
+put* SRMAR   phi     $SRCL_lock
+
+noplot PRCL_lock
+noplot SRCL_lock
+noplot MICH_lock
+noplot DARM_lock
+noplot CARM_lock
+noplot mMICH_lock
+noplot ETMX_lock
+noplot ETMY_lock
+*/
+###########################################################################
+%%% FTend locks
+
+%%% FTblock commands
+/*
+#pd TRYtrans nPTY
+#pd TRXtrans nPTX
+#pd PRMp nPRMHRb
+#pd PRMARtrans nREFL
+#pd SRMtrans nSRMARb
+#xaxis ETMXHR phi lin 0 360 2000
+#put ETMYHR phi $x1
+
+#yaxis log abs
+#noxaxis
+*/
+%%% FTend commands
+
+
+
+
